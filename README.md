@@ -1,11 +1,19 @@
 # MemoryFlow Releases
 
-CLI binaries and install script for MemoryFlow.
+CLI binaries and install scripts for MemoryFlow.
 
 ## Install
 
+### macOS / Linux
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nickkyjimmy/memoryflow-releases/main/install.sh | bash
+```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/nickkyjimmy/memoryflow-releases/main/install.ps1 | iex
 ```
 
 Then connect to your server:

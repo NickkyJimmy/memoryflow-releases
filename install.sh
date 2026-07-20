@@ -14,8 +14,14 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-REPO_URL="https://github.com/nickkyjimmy/memoryflow-releases.git"
-REPO_WEB_URL="https://github.com/nickkyjimmy/memoryflow-releases"  # without .git, for GitHub web APIs
+REPO_URL="https://github.com/nickkyjimmy/memoryflow.git"
+REPO_WEB_URL="https://github.com/nickkyjimmy/memoryflow"  # without .git, for GitHub web APIs
+# CLI binaries, checksums, and "latest version" all resolve against the
+# release repo goreleaser actually publishes to — the source repo's own
+# releases page is stale (kept only for historical release notes). Version
+# tags stay in lockstep between the two repos, so a tag resolved here is
+# still valid for checking out self-host server assets from REPO_URL.
+RELEASE_REPO_WEB_URL="https://github.com/nickkyjimmy/memoryflow-releases"
 INSTALL_DIR="${MEMORYFLOW_INSTALL_DIR:-$HOME/.memoryflow/server}"
 BREW_PACKAGE="nickkyjimmy/tap/memoryflow"
 
@@ -143,13 +149,13 @@ install_cli_binary() {
 
   # Get latest release tag
   local latest
-  latest=$(curl -sI "$REPO_WEB_URL/releases/latest" 2>/dev/null | grep -i '^location:' | sed 's/.*tag\///' | tr -d '\r\n' || true)
+  latest=$(get_latest_version)
   if [ -z "$latest" ]; then
     fail "Could not determine latest release. Check your network connection."
   fi
 
   local version="${latest#v}"
-  local url="https://github.com/nickkyjimmy/memoryflow-releases/releases/download/${latest}/memoryflow-cli-${version}-${OS}-${ARCH}.tar.gz"
+  local url="$RELEASE_REPO_WEB_URL/releases/download/${latest}/memoryflow-cli-${version}-${OS}-${ARCH}.tar.gz"
   local tmp_dir
   tmp_dir=$(mktemp -d)
 
@@ -196,7 +202,7 @@ add_to_path() {
 
 get_latest_version() {
   # grep exits 1 when no match; use `|| true` to avoid triggering pipefail
-  curl -sI "$REPO_WEB_URL/releases/latest" 2>/dev/null | grep -i '^location:' | sed 's/.*tag\///' | tr -d '\r\n' || true
+  curl -sI "$RELEASE_REPO_WEB_URL/releases/latest" 2>/dev/null | grep -i '^location:' | sed 's/.*tag\///' | tr -d '\r\n' || true
 }
 
 get_selfhost_ref() {
